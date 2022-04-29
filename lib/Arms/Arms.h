@@ -1,18 +1,30 @@
 #ifndef Arms_h
 #define Arms_h
+#include <Servo.h>
+#if ARDUINO > 22
+#include "Arduino.h"
+#else
+#include "WProgram.h"
+#endif
 
-// Motor Pin definitions
-#define IN1 4
-#define IN2 3
-#define IN3 8
-#define IN4 7
-#define ENA 6
-#define ENB 5
+#define SHOULDER_PIN 6
+#define ELBOW_PIN 5
+#define GRIPPER_PIN 9
 
 class Arms
 {
 public:
     Arms();
+    void config_servos();
+    void moveShoulder(int);
+    void moveElbow(int);
+    void moveGripper(byte);
+
+private:
+    Servo _servoShoulder;
+    Servo _servoElbow;
+    Servo _servoGripper;
+    void startPosition();
 };
 
 #endif

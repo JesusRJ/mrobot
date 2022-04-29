@@ -6,8 +6,10 @@
 #define IN2 3
 #define IN3 8
 #define IN4 7
-#define ENA 6
-#define ENB 5
+#define ENA 44
+#define ENB 45
+
+#define MAX_SPEED 255
 
 class Motors
 {

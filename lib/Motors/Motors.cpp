@@ -5,9 +5,7 @@
 L298N motorLeft(ENA, IN1, IN2);
 L298N motorRight(ENB, IN3, IN4);
 
-Motors::Motors()
-{
-}
+Motors::Motors() {}
 
 void Motors::forward(unsigned short speed)
 {

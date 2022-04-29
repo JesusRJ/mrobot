@@ -1,5 +1,6 @@
 #include <PS2X_lib.h>
 #include <Motors.h>
+#include <Arms.h>
 
 // right now, the library does NOT support hot pluggable controllers, meaning
 // you must always either restart your Arduino after you conect the controller,
@@ -16,6 +17,7 @@ byte vibrate = 0;
 
 // Create PS2 Controller Class
 PS2X ps2x;
+
 // Create robo parts
 Motors motors;
 Arms arms;
@@ -23,6 +25,8 @@ Arms arms;
 void setup()
 {
   Serial.begin(57600);
+
+  arms.config_servos();
 
   // setup pins and settings:  GamePad(clock, command, attention, data, Pressures?, Rumble?) check for error
   error = ps2x.config_gamepad(GPCLK, GPCMD, GPATT, GPDAT, true, true);
@@ -64,7 +68,7 @@ void setup()
   // motorLeft.setSpeed(255);
   // motorRight.setSpeed(255);
 }
-
+int pos = 100;
 void loop()
 {
   /* You must Read Gamepad to get new values
@@ -87,28 +91,62 @@ void loop()
 
   if (ps2x.Button(PSB_PAD_UP))
   {
-    byte speed = ps2x.Analog(PSAB_PAD_UP);
-    motors.forward(speed);
+    // byte speed = ps2x.Analog(PSAB_PAD_UP);
+    motors.forward(MAX_SPEED);
   }
   if (ps2x.Button(PSB_PAD_DOWN))
   {
-    byte speed = ps2x.Analog(PSAB_PAD_DOWN);
-    motors.backward(speed);
+    // byte speed = ps2x.Analog(PSAB_PAD_DOWN);
+    motors.backward(MAX_SPEED);
   }
   if (ps2x.Button(PSB_PAD_RIGHT))
   {
-    byte speed = ps2x.Analog(PSAB_PAD_RIGHT);
-    motors.right(speed);
+    // byte speed = ps2x.Analog(PSAB_PAD_RIGHT);
+    motors.right(MAX_SPEED);
   }
   if (ps2x.Button(PSB_PAD_LEFT))
   {
-    byte speed = ps2x.Analog(PSAB_PAD_LEFT);
-    motors.left(speed);
+    // byte speed = ps2x.Analog(PSAB_PAD_LEFT);
+    motors.left(MAX_SPEED);
   }
 
   if (ps2x.ButtonReleased(PSB_PAD_UP) || ps2x.ButtonReleased(PSB_PAD_DOWN) || ps2x.ButtonReleased(PSB_PAD_RIGHT) || ps2x.ButtonReleased(PSB_PAD_LEFT))
   {
     motors.stop();
+  }
+
+  // Arms
+  if (ps2x.Button(PSB_L1) || ps2x.Button(PSB_R1))
+  {
+    // Serial.print("Stick Values: Left[");
+    // Serial.print(ps2x.Analog(PSS_LX), DEC); // Left stick, Y axis. Other options: LX, RY, RX
+    // Serial.print(",");
+    // Serial.print(ps2x.Analog(PSS_LY), DEC);
+    // Serial.print("] Rigth[");
+    // Serial.print(ps2x.Analog(PSS_RX), DEC);
+    // Serial.print(",");
+    // Serial.print(ps2x.Analog(PSS_RY), DEC);
+    // Serial.println("]");
+
+    // arms.moveGripper(ps2x.Analog(PSS_RY));
+    // arms.moveElbow(ps2x.Analog(PSS_RX));
+  }
+
+  if (ps2x.Button(PSB_L1))
+  {
+    if (pos > 100)
+    {
+      pos--;
+      arms.moveGripper(pos);
+    }
+  }
+  if (ps2x.Button(PSB_R1))
+  {
+    if (pos < 137)
+    {
+      pos++;
+      arms.moveGripper(pos);
+    }
   }
 
   // if (ps2x.ButtonReleased(PSB_PAD_DOWN))
@@ -155,6 +193,34 @@ void loop()
   //   Serial.print(ps2x.Analog(PSS_RY), DEC);
   //   Serial.println("]");
   // }
+
+  byte px = ps2x.Analog(PSS_LX);
+  byte py = ps2x.Analog(PSS_LY);
+
+  if (py < 128)
+  {
+    int speed = map(py, 0, 128, 255, 0);
+    motors.forward(speed);
+  }
+  else if (py > 128)
+  {
+    int speed = map(py, 128, 255, 0, 255);
+    motors.backward(speed);
+  }
+  else if (px < 128)
+  {
+    int speed = map(px, 0, 128, 255, 0);
+    motors.left(speed);
+  }
+  else if (px > 128)
+  {
+    int speed = map(px, 128, 255, 0, 255);
+    motors.right(speed);
+  }
+  else
+  {
+    motors.stop();
+  }
 
   delay(50);
 }
